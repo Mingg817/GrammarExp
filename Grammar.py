@@ -68,7 +68,7 @@ class Grammar:
             """
             # 加入
             if (i == 0):  # 如果Vn==N，不把自己带入自己
-                continue
+                pass
             else:
                 # _p是获取以前遍历过的N
                 _p = {VnList[j]: self.P[VnList[j]] for j in range(0, i)}
