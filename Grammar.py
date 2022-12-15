@@ -13,64 +13,87 @@ class Grammar:
         return "\n".join(ls)
 
     def readFromFile(self, filename: str):
-        with open(filename) as f:
-            for i in f.readlines():
-                ls = i.strip("\n").strip(";").split("->")
-                a = ls[0]
-                if self.S is None:
-                    self.S = a
-                    start = 0
-                b = ls[1].split("|")
-                # 加入非终结符
-                for j in a:
-                    self.Vn.add(j)
-                # 加入终结符
-                # 加入产生式
-                for j in b:
-                    for k in j:
-                        if k.islower():
-                            self.Vt.add(k)
-                    self.P[a] = self.P.get(a, set())
-                    self.P[a].add(j)
-            print(self)
-            print()
+        try:
+            with open(filename) as f:
+                for i in f.readlines():
+                    ls = i.strip("\n").strip(";").split("->")
+                    a = ls[0]
+                    if self.S is None:
+                        self.S = a
+                    b = ls[1].split("|")
+                    # 加入非终结符
+                    for j in a:
+                        self.Vn.add(j)
+                    # 加入终结符
+                    # 加入产生式
+                    for j in b:
+                        for k in j:
+                            if k.islower():
+                                self.Vt.add(k)
+                        self.P[a] = self.P.get(a, set())
+                        self.P[a].add(j)
+                print(self)
+                print()
+        except IOError:
+            print("读取文件失败！")
 
-    def __getNewVn(self):
+    def __getNewVn(self) -> str:
+        """
+        用于产生一个新的非终结符
+        :return: 返回新的非终结符
+        """
         for i in range(ord("A"), ord("Z")):
             if chr(i) not in self.Vn:
                 return chr(i)
 
-    # p是产生式
     def __remove_left_recursion(self):
-        backup = self.P.copy()
+        """
+        用于消除左递归
+        :return:
+        """
         VnList = list(self.Vn)
-        print(VnList)
+        print("非终结符顺序是:", "->".join(VnList))
         ranges = range(len(VnList))
-        for i in ranges:
-            N = VnList[i]
+        """
+        递归每一个非终结符对应的语句
+        """
+        for i in ranges:  # i是序号
+            N = VnList[i]  # N就是这个序号对应的非终结符
+            """
+            我们需要把N对应的文法右部开始的非终结符Vn消除
+            消除方法：
+                如果Vn==N，不把自己带入自己
+                如果Vn==以前遍历过的N (N in [VnList[j]] for j in range(0,i))，把对应的语句带入
+                其他情况不带入
+            """
             # 加入
-            if (i == 0):
+            if (i == 0):  # 如果Vn==N，不把自己带入自己
                 continue
             else:
+                # _p是获取以前遍历过的N
                 _p = {VnList[j]: self.P[VnList[j]] for j in range(0, i)}
+                # p是获取当前N对应语句
                 p = self.P[N]
+                # while中反复把文法右部开始的非终结符消除
                 while (True):
                     new_p = set()
                     for item in p:
                         # 检测左边是否存在非终结符
                         if str.isupper(item[0]) and item[0] != N and (item[0] in _p.keys()):
-                            for i in _p[item[0]]:
-                                new_p.add(i + item[1:])
+                            for j in _p[item[0]]:
+                                new_p.add(j + item[1:])
                             # 注意！带入过一次不能再次带入，要删掉
                             _p.pop(item[0])
                         else:
                             new_p.add(item)
-                    if (new_p == p):
-                        self.P[N]=new_p
+                    if (new_p == p):  # 如果循环一遍没有变化，则退出
+                        self.P[N] = new_p
                         break
-                    else:
+                    else:  # 如果循环一遍有变化，再来一轮循环
                         p = new_p
-            # 分类
+            """
+            将左递归去除
+            """
             alpha = set()
             beta = set()
             for item in self.P[N]:
@@ -78,7 +101,7 @@ class Grammar:
                     alpha.add(item[1:])
                 else:
                     beta.add(item)
-            if (alpha == set()):
+            if (alpha == set()):  # 说明这个非终结符对应的文法没有左递归
                 continue
             # 构造新非终结符
             newVn = self.__getNewVn()
@@ -88,6 +111,10 @@ class Grammar:
             self.P[N] = set([f"{i}{newVn}" for i in beta])
 
     def __remove_left_gene(self):
+        """
+        提取左因子
+        :return:
+        """
         while (True):
             old_vn_set = self.Vn.copy()
             for N in self.Vn.copy():
@@ -125,4 +152,5 @@ class Grammar:
     def tran_LL1(self):
         self.__remove_left_recursion()
         self.__remove_left_gene()
+        print("转化为LL1文法完成！")
         print(self)
