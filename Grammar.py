@@ -22,9 +22,12 @@ class Grammar:
                         self.S = a
                     b = ls[1].split("|")
                     # 加入非终结符
-                    for j in a:
-                        self.Vn.add(j)
+                    self.Vn.add(a)
                     # 加入终结符
+                    for j in b:
+                        for item in j:
+                            if not str.isupper(item):
+                                self.Vt.add(item)
                     # 加入产生式
                     for j in b:
                         for k in j:
