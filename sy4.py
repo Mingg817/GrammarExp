@@ -1,4 +1,6 @@
 import copy
+from prettytable import PrettyTable
+
 
 Vn = {'A', 'B', 'F', 'T', 'E'}
 Vt = {'+', ')', '*', 'i', '('}
@@ -85,13 +87,10 @@ def create_LL1_FL():
             break
 
 
-from prettytable import PrettyTable
-
-
 def print_LL1_FL():
     pt = PrettyTable()
     pt.field_names = ['非终结符', "FIRST", "FOLLOW"]
-    for n in Vn:
+    for n in sorted(Vn):
         pt.add_row([n, FIRST.get(n), FOLLOW.get(n)])
     print(pt)
 
@@ -112,15 +111,45 @@ def create_LL1_table():
 
 def print_LL1_table():
     pt = PrettyTable()
-    vt = [t for t in Vt]+['#']
+    vt = [t for t in Vt] + ['#']
     vt.sort()
     pt.field_names = ['非终结符'] + vt
-    for n in Vn:
+    for n in sorted(Vn):
         pt.add_row([n] + [TABLE[n][t] for t in vt])
     print(pt)
 
 
+def LL1Analyzer(table: dict, s: str, LexicalAnalyzerList: list):
+    print(f"正在分析:")
+    inputStack = ['i' if str.isdigit(item[0]) else item[0]
+                  for item in LexicalAnalyzerList] + ['#']
+    print(inputStack)
+    analysisStack = ['#', s]
+    done = lambda x, y: x[-1] == y[-1] == '#'
+    try:
+        while (not done(inputStack, analysisStack)):
+            if (analysisStack[-1] == inputStack[0]):
+                analysisStack.pop()
+                inputStack.pop(0)
+                continue
+            p = table[analysisStack[-1]][inputStack[0]]
+            if (p == 'error'):
+                raise KeyError
+            analysisStack.pop()
+            if (p == '@'):
+                continue
+            analysisStack.extend(p[::-1])
+    except KeyError:
+        print("错误")
+    else:
+        print("正确")
+
+
 create_LL1_FL()
+print_LL1_FL()
 create_LL1_table()
 print_LL1_table()
+from LexicalAnalyzer import LexicalAnalyzer
+
+LL1Analyzer(TABLE, S, LexicalAnalyzer("((ab3+de4)*5)+1").result)
 print("Done")

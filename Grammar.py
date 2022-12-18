@@ -12,31 +12,34 @@ class Grammar:
         ls.sort(key=lambda x: -1 if x[0] == self.S else 0)
         return "\n".join(ls)
 
+    def readFromList(self,l:list):
+        for i in l:
+            ls = i.strip("\n").strip(";").split("->")
+            a = ls[0]
+            if self.S is None:
+                self.S = a
+            b = ls[1].split("|")
+            # 加入非终结符
+            self.Vn.add(a)
+            # 加入终结符
+            for j in b:
+                for item in j:
+                    if not str.isupper(item):
+                        self.Vt.add(item)
+            # 加入产生式
+            for j in b:
+                for k in j:
+                    if k.islower():
+                        self.Vt.add(k)
+                self.P[a] = self.P.get(a, set())
+                self.P[a].add(j)
+        print(self)
+        print()
+
     def readFromFile(self, filename: str):
         try:
             with open(filename) as f:
-                for i in f.readlines():
-                    ls = i.strip("\n").strip(";").split("->")
-                    a = ls[0]
-                    if self.S is None:
-                        self.S = a
-                    b = ls[1].split("|")
-                    # 加入非终结符
-                    self.Vn.add(a)
-                    # 加入终结符
-                    for j in b:
-                        for item in j:
-                            if not str.isupper(item):
-                                self.Vt.add(item)
-                    # 加入产生式
-                    for j in b:
-                        for k in j:
-                            if k.islower():
-                                self.Vt.add(k)
-                        self.P[a] = self.P.get(a, set())
-                        self.P[a].add(j)
-                print(self)
-                print()
+                self.readFromList(f.readlines())
         except IOError:
             print("读取文件失败！")
 
