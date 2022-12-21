@@ -1,8 +1,8 @@
 import copy
 
-from prettytable import PrettyTable
-
 from Grammar import Grammar
+from LexicalAnalyzer import LexicalAnalyzer
+from prettytable import PrettyTable
 
 g = Grammar()
 g.readFromList(["S->a|b|(B)", "A->S,A|S", "B->A"])
@@ -14,6 +14,7 @@ Vt = copy.deepcopy(g.Vt)
 
 FIRSTVT = {i: set() for i in Vn}
 LASTVT = {i: set() for i in Vn}
+TABLE = {n: {t: set() for t in Vt} for n in Vt}
 
 
 def FIRSTVT_rule(vn: str, p: str):
@@ -70,6 +71,43 @@ def print_VT():
     print(pt)
 
 
+def create_OP_table():
+    for k, v in copy.deepcopy(P).items():
+        for p in v:
+            ind = 0
+            while (True):
+                try:
+                    if (not str.isupper(p[ind])) and (str.isupper(p[ind + 1])):
+                        for item in FIRSTVT[p[ind + 1]]:
+                            TABLE[p[ind]][item] = '<'
+                    if (str.isupper(p[ind])) and (not str.isupper(p[ind + 1])):
+                        for item in LASTVT[p[ind]]:
+                            TABLE[item][p[ind + 1]] = '>'
+                    if (not str.isupper(p[ind])) and (not str.isupper(p[ind + 2])):
+                        TABLE[p[ind]][p[ind + 2]] = '='
+                except IndexError:
+                    break
+                else:
+                    ind += 1
+
+
+def print_OP_tabel():
+    pt = PrettyTable()
+    vt = sorted(list(Vt))
+    vt.sort()
+    pt.field_names = ['TABLE'] + vt
+    for n in vt:
+        pt.add_row([n] + ['\033[1m' + TABLE[n][t] + '\033[0m' if TABLE[n][t] != set() else " " for t in vt])
+    print(pt)
+
+def analyzer( LexicalAnalyzerResult: list):
+    print(LexicalAnalyzerResult)
+
+
 create_VT()
 print_VT()
+create_OP_table()
+print_OP_tabel()
+
+analyzer(LexicalAnalyzer("1+1").result)
 print('Done')
