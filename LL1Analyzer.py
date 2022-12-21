@@ -92,7 +92,8 @@ class LL1Analyzer:
         pt = PrettyTable()
         pt.field_names = ['非终结符', "FIRST集", "FOLLOW集"]
         for n in sorted(self.Vn):
-            _print = lambda x: " ".join(sorted(list(x)))
+            def _print(x): " ".join(sorted(list(x)))
+
             pt.add_row([n, _print(self.FIRST.get(n)), _print(self.FOLLOW.get(n))])
         print(pt)
 
@@ -124,7 +125,10 @@ class LL1Analyzer:
                       for item in LexicalAnalyzerResult] + ['#']
         print(inputStack)
         analysisStack = ['#', self.S]
-        done = lambda x, y: x[-1] == y[-1] == '#'
+
+        def done(x, y):
+            return x[-1] == y[-1] == '#'
+
         try:
             while (not done(inputStack, analysisStack)):
                 if (analysisStack[-1] == inputStack[0]):

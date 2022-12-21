@@ -1,8 +1,9 @@
 import copy
 
+from prettytable import PrettyTable
+
 from Grammar import Grammar
 from LexicalAnalyzer import LexicalAnalyzer
-from prettytable import PrettyTable
 
 g = Grammar()
 g.readFromList(["S->a|b|(B)", "A->S,A|S", "B->A"])
@@ -65,7 +66,9 @@ def create_VT():
 def print_VT():
     pt = PrettyTable()
     pt.field_names = ['非终结符', "FIRSTVT", "LASTVT"]
-    _print = lambda x: " ".join(sorted(list(x)))
+
+    def _print(x): " ".join(sorted(list(x)))
+
     for n in sorted(Vn):
         pt.add_row([n, _print(FIRSTVT.get(n)), _print(LASTVT.get(n))])
     print(pt)
@@ -100,7 +103,8 @@ def print_OP_tabel():
         pt.add_row([n] + ['\033[1m' + TABLE[n][t] + '\033[0m' if TABLE[n][t] != set() else " " for t in vt])
     print(pt)
 
-def analyzer( LexicalAnalyzerResult: list):
+
+def analyzer(LexicalAnalyzerResult: list):
     print(LexicalAnalyzerResult)
 
 

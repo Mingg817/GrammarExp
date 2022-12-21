@@ -1,6 +1,6 @@
 import copy
-from prettytable import PrettyTable
 
+from prettytable import PrettyTable
 
 Vn = {'A', 'B', 'F', 'T', 'E'}
 Vt = {'+', ')', '*', 'i', '('}
@@ -125,7 +125,10 @@ def LL1Analyzer(table: dict, s: str, LexicalAnalyzerList: list):
                   for item in LexicalAnalyzerList] + ['#']
     print(inputStack)
     analysisStack = ['#', s]
-    done = lambda x, y: x[-1] == y[-1] == '#'
+
+    def done(x, y):
+        return x[-1] == y[-1] == '#'
+
     try:
         while (not done(inputStack, analysisStack)):
             if (analysisStack[-1] == inputStack[0]):
