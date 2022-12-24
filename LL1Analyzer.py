@@ -92,7 +92,7 @@ class LL1Analyzer:
         pt = PrettyTable()
         pt.field_names = ['非终结符', "FIRST集", "FOLLOW集"]
         for n in sorted(self.Vn):
-            def _print(x): " ".join(sorted(list(x)))
+            def _print(x): return " ".join(sorted(list(x)))
 
             pt.add_row([n, _print(self.FIRST.get(n)), _print(self.FOLLOW.get(n))])
         print(pt)
