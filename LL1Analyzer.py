@@ -7,10 +7,10 @@ from Grammar import Grammar
 
 class LL1Analyzer:
     def __init__(self, grammar: Grammar):
-        self.Vn = grammar.Vn
-        self.Vt = grammar.Vt
-        self.S = grammar.S
-        self.P = grammar.P
+        self.Vn = copy.deepcopy(grammar.Vn)
+        self.Vt = copy.deepcopy(grammar.Vt)
+        self.S = copy.deepcopy(grammar.S)
+        self.P = copy.deepcopy(grammar.P)
         self.FIRST = {i: set() for i in self.Vn}
         self.FOLLOW = {i: set() for i in self.Vn}
         self.TABLE = {n: {t: "error" for t in self.Vt.union('#')} for n in self.Vn}
