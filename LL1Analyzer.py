@@ -127,7 +127,7 @@ class LL1Analyzer:
         analysisStack = ['#', self.S]
 
         def done(x, y):
-            return x[-1] == y[-1] == '#'
+            return x[0] == y[-1] == '#'
 
         try:
             while (not done(inputStack, analysisStack)):
