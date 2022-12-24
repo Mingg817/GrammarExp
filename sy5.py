@@ -6,7 +6,7 @@ from Grammar import Grammar
 from LexicalAnalyzer import LexicalAnalyzer
 
 g = Grammar()
-g.readFromList(["S->a|b|(B)", "A->S,A|S", "B->A"])
+g.readFromList(["E->T|E+T", "T->F|T*F;", "F->i|(E)"])
 
 S = copy.deepcopy(g.S)
 P = copy.deepcopy(g.P)
@@ -67,7 +67,7 @@ def print_VT():
     pt = PrettyTable()
     pt.field_names = ['非终结符', "FIRSTVT", "LASTVT"]
 
-    def _print(x): " ".join(sorted(list(x)))
+    def _print(x): return " ".join(sorted(list(x)))
 
     for n in sorted(Vn):
         pt.add_row([n, _print(FIRSTVT.get(n)), _print(LASTVT.get(n))])
@@ -105,7 +105,66 @@ def print_OP_tabel():
 
 
 def analyzer(LexicalAnalyzerResult: list):
-    print(LexicalAnalyzerResult)
+    print(f"- 正在分析:", end=" ")
+    inputStack = ['i' if str.isdigit(item[0]) else item[0]
+                  for item in LexicalAnalyzerResult] + ['#']
+    print(inputStack)
+    analysisStack = ['#', inputStack.pop(0)]
+
+    T_TABEL = {}
+    for k, v in P.items():
+        for item in v:
+            for i in item:
+                if (not str.isupper(i)):
+                    T_TABEL[i] = (k, item)
+
+    def done(x, y):
+        if (y == ['#'] and len(x) < 3 and x[0] == '#' and str.isupper(x[1])):
+            return True
+        else:
+            return False
+
+    def check(analysisStack, inputStack):
+        """
+        :param analysisStack:
+        :param inputStack:
+        :return: -1 < | 0 = | 1 >
+        """
+        a = analysisStack.copy()
+        b = inputStack[0]
+        while (str.isupper(a[-1])):
+            a.pop()
+        a = a[-1]
+        if (b == '#'):
+            return 1, a
+        if (a[-1] == '#'):
+            return -1, a
+        r = TABLE[a][b]
+        if (r == '='):
+            return 0, a
+        elif (r == '<'):
+            return -1, a
+        elif (r == '>'):
+            return 1, a
+        else:
+            raise KeyError
+
+    try:
+        while (not done(analysisStack, inputStack)):
+            result, t = check(analysisStack, inputStack)
+            if (result == -1 or result == 0):
+                analysisStack.append(inputStack.pop(0))
+            if (result == 1):
+                n, p = T_TABEL[t]
+                analysisStack = analysisStack[:-(len(p))]
+                analysisStack.append(n)
+
+    except KeyError:
+        print("错误!")
+    except IndexError:
+        print("错误!")
+    else:
+        print("正确!")
 
 
 create_VT()
@@ -113,5 +172,5 @@ print_VT()
 create_OP_table()
 print_OP_tabel()
 
-analyzer(LexicalAnalyzer("1+1").result)
+analyzer(LexicalAnalyzer("(1+2)*3+(5+6*7)").result)
 print('Done')
